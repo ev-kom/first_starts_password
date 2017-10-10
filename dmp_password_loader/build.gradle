@@ -1,0 +1,15 @@
+group 'dmp_password_loader'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "com.esotericsoftware:kryo:4.0.0"
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
