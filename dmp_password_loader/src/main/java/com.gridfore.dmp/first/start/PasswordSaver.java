@@ -2,15 +2,16 @@ package com.gridfore.dmp.first.start;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
-import com.sun.istack.internal.NotNull;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.*;
-import java.net.URISyntaxException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,8 +31,10 @@ public class PasswordSaver {
     private static String pathToDb;
     private static String cacheName;
     private static String algorithm;
-    private static String publicKeyPath;
-    private static PublicKey publicKey;
+    private static String userPublicKeyPath;
+    private static String servicePublicKeyPath;
+    private static PublicKey userPublicKey;
+    private static PublicKey servicePublicKey;
 
     private static final ThreadLocal<Kryo> kryoThreadLocal = ThreadLocal.withInitial(() -> {
         Kryo kryo = new Kryo();
@@ -45,13 +48,15 @@ public class PasswordSaver {
 
         Properties props = getProperties();
         loadProperties(props);
-        publicKey = loadPublicKey(publicKeyPath);
+        userPublicKey = loadPublicKey(userPublicKeyPath);
+        servicePublicKey = loadPublicKey(servicePublicKeyPath);
 
         Scanner scanner = new Scanner(System.in);
         tokensList.forEach(token -> {
             System.out.println("Enter the password for token [" + token + "]: ");
             String password = scanner.next();
-            passwordMap.put(token, encryptData(password.getBytes(), publicKey));
+            byte[] userEncryptData = encryptData(password.getBytes(), userPublicKey);
+            passwordMap.put(token, encryptData(userEncryptData, servicePublicKey));
         });
         scanner.close();
 
@@ -94,16 +99,15 @@ public class PasswordSaver {
         }
     }
 
-    @NotNull
     public static Properties getProperties() {
         Properties properties = new Properties();
-        InputStream input;
         try {
-            String name = Paths.get(PasswordSaver.class.getResource("/initial.properties").toURI()).toString();
-            input = new FileInputStream(name);
-            properties.load(input);
+            File jarPath = new File(PasswordSaver.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+            String propertiesPath = jarPath.getParentFile().getAbsolutePath();
+            System.out.println("Properties path: " + propertiesPath);
+            properties.load(new FileInputStream(propertiesPath+"/initial.properties"));
             return properties;
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             throw new IllegalArgumentException("Error loading properties ", e);
         }
     }
@@ -136,7 +140,8 @@ public class PasswordSaver {
         pathToDb = props.getProperty("initial.path.to.db");
         cacheName = props.getProperty("initial.cache.name");
         algorithm = props.getProperty("initial.algorithm");
-        publicKeyPath = props.getProperty("initial.public.key.path");
+        userPublicKeyPath = props.getProperty("initial.user.public.key.path");
+        servicePublicKeyPath = props.getProperty("initial.service.public.key.path");
 
         try {
             Files.createDirectories(Paths.get(pathToDb));

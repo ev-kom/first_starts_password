@@ -1,6 +1,5 @@
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
-import com.sun.istack.internal.NotNull;
 import org.junit.Test;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 
@@ -19,7 +18,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -93,7 +91,6 @@ public class PasswordSaverTest {
         }
     }
 
-    @NotNull
     public static Properties getProperties() {
         Properties properties = new Properties();
         InputStream input;

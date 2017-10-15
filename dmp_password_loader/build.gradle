@@ -1,7 +1,29 @@
 group 'dmp_password_loader'
 version '1.0-SNAPSHOT'
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
+    }
+}
+
 apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+mainClassName = "com.gridfore.dmp.first.start.PasswordSaver"
+
+shadowJar {
+    configurations = [project.configurations.compile]
+}
+
+runShadow {
+    args 'foo'
+}
+
 
 sourceCompatibility = 1.8
 
