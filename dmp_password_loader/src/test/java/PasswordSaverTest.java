@@ -43,14 +43,16 @@ public class PasswordSaverTest {
         Properties props = getProperties();
         loadProperties(props);
 
-        PrivateKey privateKey = loadPrivateKey("security/private.key");
+        PrivateKey servicePrivateKey = loadPrivateKey("security/private_key.der");
+        PrivateKey userPrivateKey = loadPrivateKey("security/user_private_key.der");
 
         loadAll();
 
         passwordMap.forEach((key, value) ->{
-            System.out.println("Token: " + key + ", Encrypted password: " + new String(value));
-            byte[] decryptPassword = decryptData(value, privateKey);
-            System.out.println("Token: " + key + ", Decrypted password: " + new String(decryptPassword));
+//            System.out.println("Token: " + key + ", Encrypted password: " + new String(value));
+            byte[] serviceDecryptPassword = decryptData(value, servicePrivateKey);
+            byte[] userDecryptPassword = decryptData(serviceDecryptPassword, userPrivateKey);
+            System.out.println("Token: " + key + ", Decrypted password: " + new String(userDecryptPassword));
         });
 
     }
